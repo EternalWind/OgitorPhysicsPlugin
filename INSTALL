@@ -1,0 +1,14 @@
+========================================================
+Install OgitorPhysicsPlugin on Debian
+////////////////////////////////////////////////////////
+
+1.Get Ogre SDK (1.7 recommend)
+2.Get Ogitor source package
+3.Compile Ogitor
+    http://www.ogitor.org/Building+Ogitor?tikiversion=Linux
+4.cd to the OgitorPhysicsPlugin directory
+5.Edit ./build.sh .Change the header search path.
+6.Run ./build.sh
+7.Copy the "Media" and "Plugins" folders to your Ogitor directory
+
+========================================================
