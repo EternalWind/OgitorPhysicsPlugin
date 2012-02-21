@@ -11,6 +11,7 @@ TiXmlElement* FysicsEditor::exportDotScene(TiXmlElement *pParent)
     TiXmlElement *pPhysics = pParent->InsertEndChild(TiXmlElement("physics"))->ToElement();
     pPhysics->SetAttribute("name", mName->get().c_str());
     pPhysics->SetAttribute("id", Ogre::StringConverter::toString(mObjectID->get()).c_str());
+    pPhysics->SetAttribute("shape", mShape->get().c_str());
     pPhysics->SetAttribute("mass", Ogre::StringConverter::toString(mMass).c_str());
     pPhysics->SetAttribute("gravity", Ogre::StringConverter::toString(mGravity).c_str());
     // physics position
@@ -100,10 +101,11 @@ void FysicsEditor::showBoundingBox(bool bShow)
 void FysicsEditor::createProperties(OgitorsPropertyValueMap &params)
 {
     PROPERTY_PTR(mPosition, "position",Ogre::Vector3,Ogre::Vector3::ZERO,0,SETTER(Ogre::Vector3, FysicsEditor, _setPosition));
-    PROPERTY_PTR(mMass, "mass", Ogre::Real, 1.f, 0, SETTER(Ogre::Real, FysicsEditor, _setFysicsMass));
-    PROPERTY_PTR(mGravity, "gravity", Ogre::Vector3, Ogre::Vector3::UNIT_Y, 0, SETTER(Ogre::Vector3, FysicsEditor, _setFysicsProperty));
-    PROPERTY_PTR(mMoveRestrict, "restrictMove", Ogre::Vector3, Ogre::Vector3(1, 1, 1), 0, SETTER(Ogre::Vector3, FysicsEditor, _setFysicsProperty));
-    PROPERTY_PTR(mMoveRestrict, "restrictRotate", Ogre::Vector3, Ogre::Vector3(1, 1, 1), 0, SETTER(Ogre::Vector3, FysicsEditor, _setFysicsProperty));
+    PROPERTY_PTR(mShape, "shape", Ogre::String, "BOX", 0, SETTER(Ogre::String, FysicsEditor, _setShape));
+    PROPERTY_PTR(mMass, "mass", Ogre::Real, 1.f, 0, SETTER(Ogre::Real, FysicsEditor, _setMass));
+    PROPERTY_PTR(mGravity, "gravity", Ogre::Vector3, Ogre::Vector3::UNIT_Y, 0, SETTER(Ogre::Vector3, FysicsEditor, _setProperty));
+    PROPERTY_PTR(mMoveRestrict, "restrictMove", Ogre::Vector3, Ogre::Vector3(1, 1, 1), 0, SETTER(Ogre::Vector3, FysicsEditor, _setProperty));
+    PROPERTY_PTR(mMoveRestrict, "restrictRotate", Ogre::Vector3, Ogre::Vector3(1, 1, 1), 0, SETTER(Ogre::Vector3, FysicsEditor, _setProperty));
     mProperties.initValueMap(params);
 }
 
@@ -119,12 +121,20 @@ bool FysicsEditor::_setPosition(OgitorsPropertyBase* property, const Ogre::Vecto
     return true;
 }
 
-bool FysicsEditor::_setFysicsMass(OgitorsPropertyBase* property, const Ogre::Real& mass)
+bool FysicsEditor::_setShape(OgitorsPropertyBase* property, const Ogre::String& shape) {
+    if(shape == "BOX" || shape == "CONVEX" || shape == "SPHERE" || shape == "CYLINDER" || shape == "TRIMESH") {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool FysicsEditor::_setMass(OgitorsPropertyBase* property, const Ogre::Real& mass)
 {
     return true;
 }
 
-bool FysicsEditor::_setFysicsProperty(OgitorsPropertyBase* property, const Ogre::Vector3& vec3)
+bool FysicsEditor::_setProperty(OgitorsPropertyBase* property, const Ogre::Vector3& vec3)
 {
     return true;
 }
@@ -207,6 +217,7 @@ FysicsEditorFactory::FysicsEditorFactory(OgitorsView *view) : CBaseEditorFactory
     mCapabilities = CAN_MOVE|CAN_DELETE|CAN_CLONE|CAN_FOCUS|CAN_DRAG|CAN_ACCEPTCOPY;
 
     AddPropertyDefinition("position","Position","The position of the object.",PROP_VECTOR3);
+    AddPropertyDefinition("shape", "Collision Shape", "The shape of the physics collision body. Value can be : BOX CONVEX SHERE CYLINDER TRIMESH .",PROP_STRING);
     AddPropertyDefinition("mass","Mass","The mass of the object.",PROP_REAL);
     AddPropertyDefinition("gravity","Gravity","The gravity direction and power of the object.",PROP_VECTOR3);
     AddPropertyDefinition("restrictMove","Movement Restrict","Which axis the object physics movement is restricted. Value can be 0 for no movement, or 1 for movement.",PROP_VECTOR3);

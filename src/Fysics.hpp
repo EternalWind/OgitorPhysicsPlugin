@@ -49,8 +49,9 @@ public:
 
 
     bool _setPosition(OgitorsPropertyBase* property, const Ogre::Vector3& position);
-    bool _setFysicsMass(OgitorsPropertyBase* property, const Ogre::Real& mass);
-    bool _setFysicsProperty(OgitorsPropertyBase* property, const Ogre::Vector3& vec3);
+    bool _setShape(OgitorsPropertyBase* property, const Ogre::String& shape);
+    bool _setMass(OgitorsPropertyBase* property, const Ogre::Real& mass);
+    bool _setProperty(OgitorsPropertyBase* property, const Ogre::Vector3& vec3);
 
 protected:
     FysicsEditor(CBaseEditorFactory *factory);
@@ -59,6 +60,7 @@ protected:
     Ogre::SceneNode *mHandle;
     Ogre::Entity *mEntity;
     OgitorsProperty<Ogre::Vector3>     *mPosition;
+    OgitorsProperty<Ogre::String>      *mShape;
     OgitorsProperty<Ogre::Real>        *mMass;
     OgitorsProperty<Ogre::Vector3>     *mGravity;
     OgitorsProperty<Ogre::Vector3>     *mMoveRestrict;
