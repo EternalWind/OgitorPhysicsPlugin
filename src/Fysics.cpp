@@ -198,6 +198,11 @@ FysicsEditor::FysicsEditor(CBaseEditorFactory *factory)
 {
     mHandle = 0;
     mPosition = 0;
+    mShape = 0;
+    mMass = 0;
+    mGravity = 0;
+    mMoveRestrict = 0;
+    mRotateRestrict = 0;
     mUsesGizmos = true;
 }
 
