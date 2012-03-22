@@ -105,7 +105,7 @@ void FysicsEditor::createProperties(OgitorsPropertyValueMap &params)
     PROPERTY_PTR(mMass, "mass", Ogre::Real, 1.f, 0, SETTER(Ogre::Real, FysicsEditor, _setMass));
     PROPERTY_PTR(mGravity, "gravity", Ogre::Vector3, Ogre::Vector3::UNIT_Y, 0, SETTER(Ogre::Vector3, FysicsEditor, _setProperty));
     PROPERTY_PTR(mMoveRestrict, "restrictMove", Ogre::Vector3, Ogre::Vector3(1, 1, 1), 0, SETTER(Ogre::Vector3, FysicsEditor, _setProperty));
-    PROPERTY_PTR(mMoveRestrict, "restrictRotate", Ogre::Vector3, Ogre::Vector3(1, 1, 1), 0, SETTER(Ogre::Vector3, FysicsEditor, _setProperty));
+    PROPERTY_PTR(mRotateRestrict, "restrictRotate", Ogre::Vector3, Ogre::Vector3(1, 1, 1), 0, SETTER(Ogre::Vector3, FysicsEditor, _setProperty));
     mProperties.initValueMap(params);
 }
 
