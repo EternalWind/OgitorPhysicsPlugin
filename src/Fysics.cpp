@@ -7,18 +7,36 @@ using namespace std;
 
 TiXmlElement* FysicsEditor::exportDotScene(TiXmlElement *pParent)
 {
+    Ogre::String shape = "";
+    PropertyOptionsVector *option = FysicsEditorFactory::GetCollisionShapes();
+    
+    for(auto iter = option->begin() ; iter != option->end() ; ++iter)
+    {
+        if(*Ogre::any_cast<int>(&(iter->mValue)) == mShape->get())
+        {
+            shape = iter->mKey;
+        }
+    }
+
     // physics object 
     TiXmlElement *pPhysics = pParent->InsertEndChild(TiXmlElement("physics"))->ToElement();
     pPhysics->SetAttribute("name", mName->get().c_str());
     pPhysics->SetAttribute("id", Ogre::StringConverter::toString(mObjectID->get()).c_str());
-    pPhysics->SetAttribute("shape", mShape->get().c_str());
-    pPhysics->SetAttribute("mass", Ogre::StringConverter::toString(mMass).c_str());
-    pPhysics->SetAttribute("gravity", Ogre::StringConverter::toString(mGravity).c_str());
+    pPhysics->SetAttribute("shape", shape.c_str());
+    pPhysics->SetAttribute("mass", Ogre::StringConverter::toString(mMass->get()).c_str());
+
+    // gravity
+    TiXmlElement *pPhysicsGravity = pPhysics->InsertEndChild(TiXmlElement("gravity"))->ToElement();
+    pPhysicsGravity->SetAttribute("x", Ogre::StringConverter::toString(mGravity->get().x).c_str());
+    pPhysicsGravity->SetAttribute("y", Ogre::StringConverter::toString(mGravity->get().y).c_str());
+    pPhysicsGravity->SetAttribute("z", Ogre::StringConverter::toString(mGravity->get().z).c_str());
+
     // physics position
     TiXmlElement *pPhysicsPosition = pPhysics->InsertEndChild(TiXmlElement("position"))->ToElement();
     pPhysicsPosition->SetAttribute("x", Ogre::StringConverter::toString(mPosition->get().x).c_str());
     pPhysicsPosition->SetAttribute("y", Ogre::StringConverter::toString(mPosition->get().y).c_str());
     pPhysicsPosition->SetAttribute("z", Ogre::StringConverter::toString(mPosition->get().z).c_str());
+
     // physics restriction
     TiXmlElement *pPhysicsRestrictMove = pPhysics->InsertEndChild(TiXmlElement("restrictMove"))->ToElement();
     pPhysicsRestrictMove->SetAttribute("x", Ogre::StringConverter::toString(mMoveRestrict->get().x).c_str());
@@ -101,7 +119,7 @@ void FysicsEditor::showBoundingBox(bool bShow)
 void FysicsEditor::createProperties(OgitorsPropertyValueMap &params)
 {
     PROPERTY_PTR(mPosition, "position",Ogre::Vector3,Ogre::Vector3::ZERO,0,SETTER(Ogre::Vector3, FysicsEditor, _setPosition));
-    PROPERTY_PTR(mShape, "shape", Ogre::String, "BOX", 0, SETTER(Ogre::String, FysicsEditor, _setShape));
+    PROPERTY_PTR(mShape, "shape", int, 0, 0, SETTER(int, FysicsEditor, _setShape));
     PROPERTY_PTR(mMass, "mass", Ogre::Real, 1.f, 0, SETTER(Ogre::Real, FysicsEditor, _setMass));
     PROPERTY_PTR(mGravity, "gravity", Ogre::Vector3, Ogre::Vector3::UNIT_Y, 0, SETTER(Ogre::Vector3, FysicsEditor, _setProperty));
     PROPERTY_PTR(mMoveRestrict, "restrictMove", Ogre::Vector3, Ogre::Vector3(1, 1, 1), 0, SETTER(Ogre::Vector3, FysicsEditor, _setProperty));
@@ -121,12 +139,16 @@ bool FysicsEditor::_setPosition(OgitorsPropertyBase* property, const Ogre::Vecto
     return true;
 }
 
-bool FysicsEditor::_setShape(OgitorsPropertyBase* property, const Ogre::String& shape) {
-    if(shape == "BOX" || shape == "CONVEX" || shape == "SPHERE" || shape == "CYLINDER" || shape == "TRIMESH") {
-        return true;
-    } else {
-        return false;
+bool FysicsEditor::_setShape(OgitorsPropertyBase* property, const int& shape) {
+    PropertyOptionsVector* options = FysicsEditorFactory::GetCollisionShapes();
+
+    for(auto iter = options->begin() ; iter != options->end() ; ++iter)
+    {
+        if(*Ogre::any_cast<int>(&(iter->mValue)) == shape)
+            return true;
     }
+
+    return true;
 }
 
 bool FysicsEditor::_setMass(OgitorsPropertyBase* property, const Ogre::Real& mass)
@@ -211,6 +233,7 @@ FysicsEditor::~FysicsEditor()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
+PropertyOptionsVector FysicsEditorFactory::mCollisionShapes;
 
 FysicsEditorFactory::FysicsEditorFactory(OgitorsView *view) : CBaseEditorFactory(view)
 {
@@ -221,8 +244,16 @@ FysicsEditorFactory::FysicsEditorFactory(OgitorsView *view) : CBaseEditorFactory
     mIcon = "Icons/Fysics.svg";//----------------
     mCapabilities = CAN_MOVE|CAN_DELETE|CAN_CLONE|CAN_FOCUS|CAN_DRAG|CAN_ACCEPTCOPY;
 
+    mCollisionShapes.clear();
+    mCollisionShapes.push_back(PropertyOption("BOX", Ogre::Any((int)FysicsEditor::BOX)));
+    mCollisionShapes.push_back(PropertyOption("CONVEX", Ogre::Any((int)FysicsEditor::CONVEX)));
+    mCollisionShapes.push_back(PropertyOption("SPHERE", Ogre::Any((int)FysicsEditor::SPHERE)));
+    mCollisionShapes.push_back(PropertyOption("CYLINDER", Ogre::Any((int)FysicsEditor::CYLINDER)));
+    mCollisionShapes.push_back(PropertyOption("TRIMESH", Ogre::Any((int)FysicsEditor::TRIMESH)));
+
     AddPropertyDefinition("position","Position","The position of the object.",PROP_VECTOR3);
-    AddPropertyDefinition("shape", "Collision Shape", "The shape of the physics collision body. Value can be : BOX CONVEX SHERE CYLINDER TRIMESH .",PROP_STRING);
+    AddPropertyDefinition("shape", "Collision Shape", "The shape of the physics collision body. Value can be : BOX CONVEX SHERE CYLINDER TRIMESH .",
+        PROP_INT)->setOptions(&mCollisionShapes);
     AddPropertyDefinition("mass","Mass","The mass of the object.",PROP_REAL);
     AddPropertyDefinition("gravity","Gravity","The gravity direction and power of the object.",PROP_VECTOR3);
     AddPropertyDefinition("restrictMove","Movement Restrict","Which axis the object physics movement is restricted. Value can be 0 for no movement, or 1 for movement.",PROP_VECTOR3);
@@ -261,6 +292,11 @@ CBaseEditor *FysicsEditorFactory::CreateObject(CBaseEditor **parent, OgitorsProp
 Ogre::String FysicsEditorFactory::GetPlaceHolderName()
 {
     return "Fysics.mesh";
+}
+
+PropertyOptionsVector* FysicsEditorFactory::GetCollisionShapes()
+{
+    return &mCollisionShapes;
 }
 /////////////////////////////////////////////////////////////////////////
 FysicsEditorFactory *fysicsFac = 0;

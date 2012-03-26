@@ -24,6 +24,14 @@ class PluginExport FysicsEditor: public CBaseEditor
 {
     friend class FysicsEditorFactory;
 public:
+    enum CollisionShape
+    {
+        BOX,
+        CONVEX,
+        SPHERE,
+        CYLINDER,
+        TRIMESH
+    };
 
     virtual void            showBoundingBox(bool bShow);
 
@@ -49,7 +57,7 @@ public:
 
 
     bool _setPosition(OgitorsPropertyBase* property, const Ogre::Vector3& position);
-    bool _setShape(OgitorsPropertyBase* property, const Ogre::String& shape);
+    bool _setShape(OgitorsPropertyBase* property, const int& shape);
     bool _setMass(OgitorsPropertyBase* property, const Ogre::Real& mass);
     bool _setProperty(OgitorsPropertyBase* property, const Ogre::Vector3& vec3);
 
@@ -60,7 +68,7 @@ protected:
     Ogre::SceneNode *mHandle;
     Ogre::Entity *mEntity;
     OgitorsProperty<Ogre::Vector3>     *mPosition;
-    OgitorsProperty<Ogre::String>      *mShape;
+    OgitorsProperty<int>      *mShape;
     OgitorsProperty<Ogre::Real>        *mMass;
     OgitorsProperty<Ogre::Vector3>     *mGravity;
     OgitorsProperty<Ogre::Vector3>     *mMoveRestrict;
@@ -76,6 +84,11 @@ public:
     virtual CBaseEditorFactory* duplicate(OgitorsView *view);
     virtual CBaseEditor *CreateObject(CBaseEditor **parent, OgitorsPropertyValueMap &params);
     virtual Ogre::String GetPlaceHolderName();
+
+    static PropertyOptionsVector* GetCollisionShapes();
+
+protected:
+    static PropertyOptionsVector mCollisionShapes;
 };
 
 
